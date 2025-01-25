@@ -1,10 +1,11 @@
 import java.io.*;
 import java.net.*;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class ChatServer {
     private static final int PORT = 12345;
-    private static Map<String, List<ClientHandler>> rooms = new HashMap<>();
+    private static Map<String, List<ClientHandler>> rooms = new ConcurrentHashMap<>();
 
     public static void main(String[] args) {
         try (ServerSocket serverSocket = new ServerSocket(PORT)) {
@@ -20,12 +21,12 @@ public class ChatServer {
         }
     }
 
-    public static synchronized void joinRoom(String roomID, ClientHandler client) {
+    public static  void joinRoom(String roomID, ClientHandler client) {
         rooms.putIfAbsent(roomID, new ArrayList<>());
         rooms.get(roomID).add(client);
     }
 
-    public static synchronized void leaveRoom(String roomID, ClientHandler client) {
+    public static  void leaveRoom(String roomID, ClientHandler client) {
         if (rooms.containsKey(roomID)) {
             rooms.get(roomID).remove(client);
             if (rooms.get(roomID).isEmpty()) {
@@ -34,7 +35,7 @@ public class ChatServer {
         }
     }
 
-    public static synchronized void broadcast(String roomID, String message) {
+    public static  void broadcast(String roomID, String message) {
         if (rooms.containsKey(roomID)) {
             for (ClientHandler client : rooms.get(roomID)) {
                 client.sendMessage(message);
